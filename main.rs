@@ -30,26 +30,30 @@ fn handle_command(args: &[String]) -> String {
 
     match cmd.as_str() {
         "PING" => {
-            // TODO: Return "+PONG\r\n" for no args
-            // TODO: Return bulk string for PING <message>
-            String::new()
+            if args.len() > 1 {
+                format!("${}\r\n{}\r\n",args[1].len(), args[1])
+            } else {
+                String::from("+PONG\r\n")
+            }
         }
+        // TODO: Return "+PONG\r\n" for no args
+        // TODO: Return bulk string for PING <message>
         _ => format!("-ERR unknown command\r\n"),
     }
 }
 
-fn main() {
-    let stdin = io::stdin();
-    let stdout = io::stdout();
-    let mut out = stdout.lock();
+    fn main() {
+        let stdin = io::stdin();
+        let stdout = io::stdout();
+        let mut out = stdout.lock();
 
-    for line in stdin.lock().lines() {
-        let line = line.unwrap();
-        let line = line.trim().to_string();
-        if line.is_empty() { continue; }
-        let args = parse_args(&line);
-        let response = handle_command(&args);
-        write!(out, "{}", response).unwrap();
-        out.flush().unwrap();
+        for line in stdin.lock().lines() {
+            let line = line.unwrap();
+            let line = line.trim().to_string();
+            if line.is_empty() { continue; }
+            let args = parse_args(&line);
+            let response = handle_command(&args);
+            write!(out, "{}", response).unwrap();
+            out.flush().unwrap();
+        }
     }
-}
