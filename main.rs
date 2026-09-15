@@ -1,5 +1,30 @@
 use std::io::{self, BufRead, Write};
 
+
+
+enum Reply {
+    Simple_string(String),
+    Bulk_string(String),
+    Error(String),
+    Integer(String),
+    Null_bulk_string(String),
+}
+
+impl from(&self, String) ->  {
+    //TODO Match von der Aufgabe hier rein bringen
+
+}
+
+impl Reply(&self) {
+    fn getReply -> String {
+        match self {
+            Reply::Simple_string(s) => "${}\r\n{}\r\n"
+            Reply::Bulk_string(s) => "${}\r\n{}\r\n"
+        }
+    }
+}
+
+
 fn parse_args(line: &str) -> Vec<String> {
     let mut args = Vec::new();
     let mut current = String::new();
