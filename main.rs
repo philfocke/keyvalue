@@ -28,6 +28,7 @@ fn encode_bulk_string(s: &str) -> String {
 fn handle_command(args: &[String]) -> String {
     let cmd = args[0].to_uppercase();
 
+    //len() gives bytes in utf8 not character length :)!
     match cmd.as_str() {
         "PING" => {
             if args.len() > 1 {
@@ -35,6 +36,9 @@ fn handle_command(args: &[String]) -> String {
             } else {
                 String::from("+PONG\r\n")
             }
+        }
+        "ECHO" => {
+            format!("${}\r\n{}\r\n",args[1].len(), args[1])
         }
         // TODO: Return "+PONG\r\n" for no args
         // TODO: Return bulk string for PING <message>
