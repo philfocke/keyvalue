@@ -15,8 +15,16 @@ impl Reply {
         //let Some(x,y) gibt mr wenn möglich beide Variablen sonst error ...
         //Dadurch habe ich jetzt cmd und arguments was ist arguments?
         //Tuple
-        let Some((cmd, arguments)) = args.split_first() else {
-            return Reply::Error("missing cmd".to_string());
+        //Syntactic Sugar
+        //let Some((cmd, arguments)) = args.split_first() else {
+        //    return Reply::Error("missing cmd".to_string());
+        //};
+
+        //Funktioniert nicht auf den Dingern daher richtig match
+        //Genau dasselbe nur mehr verbos
+        let (cmd, arguments) = match args.split_first() {
+            Some((cmd, arguments)) => (cmd, arguments),
+            None => return Reply::Error("missing cmd".to_string()),
         };
 
         //println!("STUFF: \n {}", cmd.to_uppercase().as_str());
