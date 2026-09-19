@@ -19,6 +19,7 @@ impl Reply {
             return Reply::Error("missing cmd".to_string());
         };
 
+        //println!("STUFF: \n {}", cmd.to_uppercase().as_str());
         match cmd.to_uppercase().as_str() {
             "PING" => {
                 //Wenn ein Argument existiert, dann packe es in die Variable und arbeite weiter?
@@ -54,6 +55,7 @@ impl Reply {
                 if let Some(argument) = arguments.first() {
                     Reply::Error(argument.clone())
                 } else {
+                    //println!("{:?}", args);
                     Reply::Error(cmd.clone())
                 }
             }
