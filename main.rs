@@ -22,6 +22,7 @@ impl Reply {
 
         //Funktioniert nicht auf den Dingern daher richtig match
         //Genau dasselbe nur mehr verbos
+        //ICh sollte auch erstmal so schreiben...
         let (cmd, arguments) = match args.split_first() {
             Some((cmd, arguments)) => (cmd, arguments),
             None => return Reply::Error("missing cmd".to_string()),
@@ -74,16 +75,16 @@ impl Reply {
         match self {
             Self::Pong => String::from("+PONG\r\n"),
             Self::SimpleString(data) => {
-                format!("+{data}\r\n")
+                format!("+{}\r\n", data)
             }
             Self::Error(data) => {
                 format!("-ERR unknown command '{}'\r\n", data)
             }
             Self::Number(data) => {
-                format!(":{data}\r\n")
+                format!(":{}\r\n", data)
             }
             Self::BulkString(data) => {
-                format!("${}\r\n{data}\r\n", data.len())
+                format!("${}\r\n{}\r\n", data.len(), data)
             }
             Self::NullBulkString(data) => {
                 format!("$-1\r\n")
