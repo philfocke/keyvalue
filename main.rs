@@ -3,23 +3,36 @@ use std::io::{self, BufRead, Write};
 
 
 enum Reply {
-    Simple_string(String),
-    Bulk_string(String),
+    Pong,
+    SimpleString(String),
+    BulkString(String),
     Error(String),
-    Integer(String),
-    Null_bulk_string(String),
+    //Number can also be float...
+    Number(isize),
+    NullBulkString(String),
 }
 
-impl from(&self, String) ->  {
-    //TODO Match von der Aufgabe hier rein bringen
+impl Reply {
+    fn from(arg: &String, arg_len: usize) -> Reply {
+        let cmd = arg.to_uppercase();
+        match cmd.as_str() {
+            "PING" =>  {
+                if arg_len > 1 {
+                    Reply::SimpleString(String::clone(&arg))
+                } else {
+                    Reply::Pong
+                }
+            },
+            _ => Reply::Error(String::from("not yet Implemented"))
+        }
 
-}
+    }
 
-impl Reply(&self) {
-    fn getReply -> String {
+
+    fn get_format_string(&self) -> String {
         match self {
-            Reply::Simple_string(s) => "${}\r\n{}\r\n"
-            Reply::Bulk_string(s) => "${}\r\n{}\r\n"
+            Reply::Pong => String::from("+PONG\r\n"),
+            _ => String::from("Not yet Implemented"),
         }
     }
 }
@@ -52,37 +65,40 @@ fn encode_bulk_string(s: &str) -> String {
 
 fn handle_command(args: &[String]) -> String {
     let cmd = args[0].to_uppercase();
+    let reply = Reply::from(&cmd, args.len());
+    reply.get_format_string()
+    
 
     //len() gives bytes in utf8 not character length :)!
-    match cmd.as_str() {
-        "PING" => {
-            if args.len() > 1 {
-                format!("${}\r\n{}\r\n",args[1].len(), args[1])
-            } else {
-                String::from("+PONG\r\n")
-            }
-        }
-        "ECHO" => {
-            format!("${}\r\n{}\r\n",args[1].len(), args[1])
-        }
-        // TODO: Return "+PONG\r\n" for no args
-        // TODO: Return bulk string for PING <message>
-        _ => format!("-ERR unknown command\r\n"),
-    }
+//    match cmd.as_str() {
+//        "PING" => {
+//            if args.len() > 1 {
+//                format!("${}\r\n{}\r\n",args[1].len(), args[1])
+//            } else {
+//                String::from("+PONG\r\n")
+//            }
+//        }
+//        "ECHO" => {
+//            format!("${}\r\n{}\r\n",args[1].len(), args[1])
+//        }
+//        // TODO: Return "+PONG\r\n" for no args
+//        // TODO: Return bulk string for PING <message>
+//        _ => format!("-ERR unknown command\r\n"),
+//    }
 }
 
-    fn main() {
-        let stdin = io::stdin();
-        let stdout = io::stdout();
-        let mut out = stdout.lock();
+fn main() {
+    let stdin = io::stdin();
+    let stdout = io::stdout();
+    let mut out = stdout.lock();
 
-        for line in stdin.lock().lines() {
-            let line = line.unwrap();
-            let line = line.trim().to_string();
-            if line.is_empty() { continue; }
-            let args = parse_args(&line);
-            let response = handle_command(&args);
-            write!(out, "{}", response).unwrap();
-            out.flush().unwrap();
-        }
+    for line in stdin.lock().lines() {
+        let line = line.unwrap();
+        let line = line.trim().to_string();
+        if line.is_empty() { continue; }
+        let args = parse_args(&line);
+        let response = handle_command(&args);
+        write!(out, "{}", response).unwrap();
+        out.flush().unwrap();
     }
+}
