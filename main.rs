@@ -4,13 +4,43 @@ enum Reply {
     Pong,
     SimpleString(String),
     BulkString(String),
-    Error(String),
+    Error(ErrorFormat, String),
     //Number can also be float...
     Number(isize),
     NullBulkString(String),
 }
 
+
+enum ErrorFormat {
+    UnknownCommand(String),
+    WrongNumberOfArguments(String),
+}
+imply ErrorFormat {
+    getFormatString (&self) -> String {
+        match self {
+            UnknownCommand => {
+                format!("-ERR unknown command '{}'");
+            },
+            WrongNumberOfArguments => {
+                format!("-ERR wrong number of arguments for '{}' command\r\n");
+            }
+        }
+    }
+}
+
 impl Reply {
+    // Hier wäre Gedanke, dass wenn ein Error kommt, geben wir den zurück, sonst geben wir einfach
+    // nichts zurück.
+    fn check_arity(String cmd, usize arguments_len) -> Option<Reply>  {
+        let (low, high) = match cmd {
+            "PING" => { (0, 1)},
+            "ECHO" => { (1, 1)},
+            _ => { (0, 100) },
+        }
+        if 
+        //if Beidnugen => Some else NONE none bedeutet keine fehler und wir gehen weiter.
+        //Arity is the number of arguments or operands that a function, operation, or relation takes in logic, mathematics, and computer science
+    }
     fn from_command(args: &[String]) -> Reply {
         //let Some(x,y) gibt mr wenn möglich beide Variablen sonst error ...
         //Dadurch habe ich jetzt cmd und arguments was ist arguments?
@@ -31,6 +61,7 @@ impl Reply {
         //println!("STUFF: \n {}", cmd.to_uppercase().as_str());
         match cmd.to_uppercase().as_str() {
             "PING" => {
+                
                 //Wenn ein Argument existiert, dann packe es in die Variable und arbeite weiter?
                 //Some ist Optionals in Java nur hole sie mir mit Some raus. und gibt mirkeinen
                 //Error dann umgeschireben if Some(argument) = argument.first {
@@ -46,7 +77,7 @@ impl Reply {
                 if let Some(argument) = arguments.first() {
                     Reply::BulkString(argument.clone())
                 } else {
-                    Reply::Error("Did not send Argument with Echo".to_string())
+                    Reply::Error(ErrorFormat::WrongNumberOfArguments, cmd.clone())
                 }
             }
             "COMMAND" => {
@@ -62,10 +93,10 @@ impl Reply {
             }
             _ => {
                 if let Some(argument) = arguments.first() {
-                    Reply::Error(argument.clone())
+                    Reply::Error(ErrorFormat::UnknownCommand, argument.clone())
                 } else {
                     //println!("{:?}", args);
-                    Reply::Error(cmd.clone())
+                    Reply::Error(ErrorFormat::UnknownCommand, cmd.clone())
                 }
             }
         }
