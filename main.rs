@@ -1,4 +1,4 @@
-use std::io::{self, BufRead, Write};
+use std::io::{self, BufRead, Read, Write};
 enum Reply {
     Pong,
     SimpleString(String),
@@ -31,7 +31,7 @@ impl Reply {
     // Hier wäre Gedanke, dass wenn ein Error kommt, geben wir den zurück, sonst geben wir einfach
     // nichts zurück.
     fn check_arity(cmd: String, arguments_len: usize) -> Option<Reply> {
-        let (low, high) = match cmd.as_str() {
+        let (low, high) = match cmd.to_uppercase().as_str() {
             "PING" => (0, 1),
             "ECHO" => (1, 1),
             _ => (0, 100),
@@ -162,18 +162,48 @@ fn handle_command(args: &[String]) -> String {
 
 fn main() {
     let stdin = io::stdin();
+    let mut input = stdin.lock();
     let stdout = io::stdout();
     let mut out = stdout.lock();
 
-    for line in stdin.lock().lines() {
-        let line = line.unwrap();
-        let line = line.trim().to_string();
-        if line.is_empty() {
-            continue;
+    //let mut header: Vec<String> = Vec::new();
+    //let mut message_header = Vec::new();
+    //let mut input_buffer = Vec::new();
+
+    //stdin.lock().read_to_end(&mut input_buffer).unwrap();
+    //
+    //
+    //
+
+    //First Line is always the amount of messages, we can just get those of readline.
+
+    loop {
+        let mut header: String = String::new();
+
+        if input.read_line(&mut header).unwrap() == 0 {
+            break; //done
         }
-        let args = Reply::parse_args(&line);
-        let response = handle_command(&args);
-        write!(out, "{}", response).unwrap();
-        out.flush().unwrap();
+
+        let count = header.trim().strip_prefix("*").unwrap().parse().unwrap();
+        //This always has the Form of *<NUM> so cut off the first Symbol and then parse the number
+        //TODO better way to not use double unwrap...
+
+        let mut args = Vec::with_capacity(count);
+
+        //We can always read the amount of incoming bytes with a line
+        for i in 0..count {
+            let mut line = String::new();
+            let _ = input.read_line(&mut line).unwrap();
+            let len: usize = line.trim().strip_prefix("$").unwrap().parse().unwrap();
+            let mut buf = vec![0u8; len + 2]; // get last 2 bytes \r\n
+            let _ = input.read_exact(&mut buf);
+            buf.truncate(len);
+
+            //add the actual Strings to our arguments like before
+            args.push(String::from_utf8(buf).unwrap());
+        }
+        eprintln!("args: {:?}", args);
+        out.write_all(handle_command(&args).as_bytes()).unwrap();
+        let _ = out.flush();
     }
 }
