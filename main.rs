@@ -104,6 +104,8 @@ impl Reply {
                     Reply::Error(CommandError::UnknownCommand(cmd.clone()))
                 }
             }
+            "SET" => Reply::SimpleString("OK".to_string()),
+            "GET" => Reply::NullBulkString("NULL".to_string()),
             _ => Reply::Error(CommandError::UnknownCommand(cmd.clone())),
         }
     }
